@@ -1,11 +1,15 @@
-version: "2"
+version: "3.9"
+services:
   event-details-service:
     container_name: event-details-service
     build: event-details-service/
-    hostname: localhost
-    network_mode: host
+    #hostname: localhost
+    #network_mode: host
     ports:
       - 8090:8090
+    environment: 
+      - servername_eureka=eureka-server
+      - servername_mongodb=mongoservice
     depends_on:
       - eureka-server
       - api-gateway
@@ -19,6 +23,9 @@ version: "2"
     network_mode: host
     ports:
       - 8088:8088
+    environment: 
+      - servername_eureka=eureka-server
+      - servername_mongodb=mongoservice
     depends_on:
       - eureka-server
       - api-gateway
@@ -32,6 +39,9 @@ version: "2"
     network_mode: host
     ports:
       - 8086:8086
+    environment: 
+      - servername_eureka=eureka-server
+      - servername_mongodb=mongoservice
     depends_on:
       - eureka-server
       - api-gateway
@@ -46,6 +56,9 @@ version: "2"
     network_mode: host
     ports:
       - 8099:8099
+    environment: 
+      - servername_eureka=eureka-server
+      - servername_mongodb=mongoservice
     depends_on:
       - eureka-server
       - api-gateway
@@ -59,6 +72,9 @@ version: "2"
     network_mode: host
     ports:
       - 8085:8085
+    environment: 
+      - servername_eureka=eureka-server
+      - servername_mongodb=mongoservice
     depends_on:
       - eureka-server
       - api-gateway
@@ -66,7 +82,24 @@ version: "2"
       - rabbitmq
     restart: always
     
-    product-webapp:
+  authentication-service:
+    container_name: authentication-service
+    build: authentication-service/
+    hostname: localhost
+    network_mode: host
+    ports:
+      - 8082:8082
+    environment: 
+      - servername_eureka=eureka-server
+      - servername_mysql=mysql
+    depends_on:
+      - eureka-server
+      - api-gateway
+      - mysql
+      - rabbitmq
+    restart: always
+    
+  product-webapp:
     build: product-webapp/
     image: product-webapp
     container_name: product-webapp
@@ -76,7 +109,7 @@ version: "2"
       - 4200:4200
     restart: always
     
-    rabbitmq:
+  rabbitmq:
     image: rabbitmq:management
     container_name: rabbitmq
     hostname: localhost
@@ -89,32 +122,20 @@ version: "2"
       RABBITMQ_DEFAULT_PASS: "guest"
     restart: always
     
-    authentication-service:
-    container_name: authentication-service
-    build: authentication-service/
-    hostname: localhost
-    network_mode: host
-    ports:
-      - 8082:8082
-    depends_on:
-      - eureka-server
-      - api-gateway
-      - mysql
-      - rabbitmq
-    restart: always
-    
-    api-gateway:
+  api-gateway:
     container_name: api-gateway
     build: api-gateway/
     hostname: localhost
     network_mode: host
     ports:
       - 8080:8080
+    environment: 
+      - servername_eureka=eureka-server
     depends_on:
       - eureka-server
     restart: always
     
-   eureka-server:
+  eureka-server:
     container_name: eureka-server
     build: eureka-server/
     hostname: localhost
@@ -123,7 +144,7 @@ version: "2"
       - 8671:8671
     restart: always
     
-   config-server:
+  config-server:
     container_name: config-server
     build: config-server/
     hostname: localhost
@@ -131,8 +152,6 @@ version: "2"
     ports:
       - 8888:8888
     restart: always 
-
-  services:
   mongoservice:
     image: mongo:latest
     container_name: mongo-container
